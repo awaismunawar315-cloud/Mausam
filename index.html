@@ -140,7 +140,7 @@ async function load(l){
    `&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m,dew_point_2m`+
    `&hourly=temperature_2m,precipitation_probability,weather_code,visibility,is_day,apparent_temperature,relative_humidity_2m,wind_speed_10m,uv_index,precipitation,cloud_cover,soil_temperature_6cm,soil_moisture_3_to_9cm`+
    `&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,daylight_duration,et0_fao_evapotranspiration`;
-  const a=`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${l.lat}&longitude=${l.lon}&current=us_aqi,pm2_5,pm10,ozone,nitrogen_dioxide,sulphur_dioxide,carbon_monoxide`;
+  const a=`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${l.lat}&longitude=${l.lon}&current=us_aqi,pm2_5,pm10,ozone,nitrogen_dioxide,sulphur_dioxide,carbon_monoxide,dust`;
   try{
     const [r1,r2]=await Promise.allSettled([fetch(f).then(r=>{if(!r.ok)throw 0;return r.json()}),fetch(a).then(r=>r.json())]);
     if(r1.status!=='fulfilled')throw 0;
@@ -528,7 +528,7 @@ function more(){
   // AQ details
   const P=AQ||{},pr=(l,v)=>v==null?'':kv(l,Math.round(v)+' µg/m³');
   const adv=aq<=50?'Air is clean. Enjoy outdoor activities.':aq<=100?'Acceptable. Very sensitive people should take it easy outdoors.':aq<=150?'Sensitive groups should limit long outdoor exertion.':'Everyone should reduce outdoor activity. Wear a mask outside.';
-  const aqT=AQ?`<div class="card"><h3>🍃 Air quality details</h3><div class="sub" style="margin:0 0 8px">${adv}</div>${pr('PM2.5',P.pm2_5)+pr('PM10',P.pm10)+pr('Ozone (O₃)',P.ozone)+pr('Nitrogen dioxide',P.nitrogen_dioxide)+pr('Sulphur dioxide',P.sulphur_dioxide)+pr('Carbon monoxide',P.carbon_monoxide)}</div>`:'';
+  const aqT=AQ?`<div class="card"><h3>🍃 Air quality details</h3><div class="sub" style="margin:0 0 8px">${adv}</div>${pr('PM2.5',P.pm2_5)+pr('PM10',P.pm10)+pr('Dust',P.dust)+pr('Ozone (O₃)',P.ozone)+pr('Nitrogen dioxide',P.nitrogen_dioxide)+pr('Sulphur dioxide',P.sulphur_dioxide)+pr('Carbon monoxide',P.carbon_monoxide)}</div>`:'';
   // farming
   const s6=h.soil_temperature_6cm[i],sm=h.soil_moisture_3_to_9cm[i],et=d.et0_fao_evapotranspiration[0],r3=d.precipitation_sum.slice(0,3).reduce((a,b)=>a+b,0);
   const spray=w<15&&pop6<30&&c.temperature_2m<36;
@@ -537,8 +537,10 @@ function more(){
   const hi=d.temperature_2m_max,mxi=hi.indexOf(Math.max(...hi)),mni=hi.indexOf(Math.min(...hi)),ps=d.precipitation_sum,pw=ps.indexOf(Math.max(...ps));
   const dn=k=>k?new Date(d.time[k]+'T00:00').toLocaleDateString('en',{weekday:'short'}):'Today';
   const sum10=`<div class="card"><h3>📅 10-day summary</h3>${kv('Hottest day',dn(mxi)+' · '+T(hi[mxi]))+kv('Coolest day',dn(mni)+' · '+T(hi[mni]))+(ps[pw]>0.2?kv('Wettest day',dn(pw)+' · '+MM(ps[pw])):'')}</div>`;
-  $('#tiles2').innerHTML=act+comfort+dayT+aqT+farm+sum10+'<div class="card" id="hist"><h3>📜 Compared with past years</h3><div class="sub">Loading…</div></div>';
-  hist();
+  const uvp=d.uv_index_max[0],sunT=tl('🧴 Sun safety',uvp>=1?Math.round(200/(3*uvp))+' min':'Low risk',uvp>=1?'Approx. minutes to sunburn (fair skin, peak UV)':'No special sun protection needed',uvp>=3?'<div class="sub">Use sunscreen SPF 30+ and a hat</div>':'');
+  const ph=(id,t,x='')=>`<div class="card" id="${id}" ${x}><h3>${t}</h3><div class="sub">Loading…</div></div>`;
+  $('#tiles2').innerHTML=act+comfort+dayT+sunT+aqT+farm+sum10+ph('hist','📜 Compared with past years')+ph('prayer','🕌 Prayer times')+ph('river','🌊 River flow')+ph('quake','🌍 Nearby earthquakes')+ph('past','📈 Past 30 days','style="grid-column:1/-1"');
+  hist();prayer();river();quake();past();
 }
 
 async function hist(){
@@ -554,6 +556,57 @@ async function hist(){
     $('#hist').innerHTML=`<h3>📜 Compared with past years</h3><div class="big">${diff>=0?'+':'−'}${Math.abs(imp()?diff*1.8:diff).toFixed(1)}°</div><div class="sub" style="margin-bottom:8px">${Math.abs(diff)<1?'About normal for this date':diff>0?'Warmer than average':'Cooler than average'}</div>`+kv('Typical high',T(avg))+(ly?kv('Same day last year',`${T(ly.temperature_2m_max[0])} / ${T(ly.temperature_2m_min[0])} · ${MM(ly.precipitation_sum[0]||0)}`):'');
   }catch{if($('#hist'))$('#hist').innerHTML='<h3>📜 Compared with past years</h3><div class="sub">Past data is not available right now.</div>'}
   if($('#hist'))tru($('#hist'));
+}
+
+// ---------- Prayer, river, earthquakes, past 30 days ----------
+Object.assign(UR,{'Sun safety':'دھوپ سے بچاؤ','Approx. minutes to sunburn (fair skin, peak UV)':'دھوپ سے جلنے میں تقریباً منٹ (گوری جلد، تیز دھوپ)','Use sunscreen SPF 30+ and a hat':'SPF 30+ سن اسکرین اور ٹوپی استعمال کریں','No special sun protection needed':'خاص حفاظت کی ضرورت نہیں','Low risk':'کم خطرہ','Prayer times':'نماز کے اوقات','Fajr':'فجر','Dhuhr':'ظہر','Asr':'عصر','Maghrib':'مغرب','Isha':'عشاء','Next:':'اگلی:','River flow':'دریا کا بہاؤ','Peak this week':'اس ہفتے کی بلند ترین سطح','Normal':'معمول','Dust':'دھول','Nearby earthquakes':'قریبی زلزلے','Last 30 days, within 600 km, magnitude 2.5+':'پچھلے 30 دن، 600 کلومیٹر کے اندر، شدت 2.5+','No earthquakes recorded nearby in this period.':'اس مدت میں قریب کوئی زلزلہ ریکارڈ نہیں ہوا۔','Past 30 days':'پچھلے 30 دن','Not available right now.':'ابھی دستیاب نہیں۔','No river near this location, or data not available.':'اس مقام کے قریب دریا نہیں، یا ڈیٹا دستیاب نہیں۔'});
+const same=k=>k===loc.lat+','+loc.lon,esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const kvh=(l,v)=>`<div class="kv"><span>${l}</span><b>${v}</b></div>`;
+function cardH(id,t,body){const e=$('#'+id);if(e){e.innerHTML=`<h3>${t}</h3>`+body;tru(e)}}
+async function prayer(){
+  const key=loc.lat+','+loc.lon;
+  try{
+    const j=await fetch(`https://api.aladhan.com/v1/timings?latitude=${loc.lat}&longitude=${loc.lon}&method=1&school=1`).then(r=>r.json());
+    if(!same(key))return;
+    const t=j.data.timings,hj=j.data.date.hijri,names=['Fajr','Dhuhr','Asr','Maghrib','Isha'];
+    const now=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:D.timezone});
+    const nx=names.find(n=>t[n].slice(0,5)>now)||'Fajr';
+    const f=x=>{const h=+x.slice(0,2);return `${h%12||12}:${x.slice(3,5)} ${h<12?'AM':'PM'}`};
+    cardH('prayer','🕌 Prayer times',names.map(n=>`<div class="kv"${n===nx?' style="background:rgba(255,255,255,.14);border-radius:10px;padding-left:8px;padding-right:8px"':''}><span>${n}</span><b>${f(t[n])}</b></div>`).join('')+`<div class="sub" style="margin-top:8px">${esc(hj.day)} ${esc(hj.month.en)} ${esc(hj.year)} AH · Next: ${nx}</div>`);
+  }catch{cardH('prayer','🕌 Prayer times','<div class="sub">Not available right now.</div>')}
+}
+async function river(){
+  const key=loc.lat+','+loc.lon;
+  try{
+    const j=await fetch(`https://flood-api.open-meteo.com/v1/flood?latitude=${loc.lat}&longitude=${loc.lon}&daily=river_discharge,river_discharge_mean&forecast_days=7`).then(r=>r.json());
+    if(!same(key))return;
+    const q=j.daily.river_discharge,m=j.daily.river_discharge_mean;
+    if(!q||q[0]==null)throw 0;
+    const ratio=q[0]/(m[0]||1),peak=Math.max(...q.filter(x=>x!=null));
+    const lvl=ratio<.5?'Low':ratio<1.5?'Normal':ratio<3?'High':'Very high';
+    cardH('river','🌊 River flow',`<div class="big">${Math.round(q[0])} m³/s</div><div class="sub"><span>${lvl}</span> · ${ratio.toFixed(1)}× average${ratio>=3?' · flood risk':''}</div>`+kvh('Peak this week',Math.round(peak)+' m³/s'));
+  }catch{cardH('river','🌊 River flow','<div class="sub">No river near this location, or data not available.</div>')}
+}
+async function quake(){
+  const key=loc.lat+','+loc.lon,since=new Date(Date.now()-30*864e5).toISOString().slice(0,10);
+  try{
+    const j=await fetch(`https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&latitude=${loc.lat}&longitude=${loc.lon}&maxradiuskm=600&starttime=${since}&minmagnitude=2.5&orderby=time&limit=5`).then(r=>r.json());
+    if(!same(key))return;
+    const f=j.features||[];
+    cardH('quake','🌍 Nearby earthquakes','<div class="sub" style="margin:0 0 6px">Last 30 days, within 600 km, magnitude 2.5+</div>'+(f.length?f.map(e=>{const p=e.properties;return kvh('M'+Number(p.mag).toFixed(1)+' · '+esc(p.place),new Date(p.time).toLocaleDateString([], {day:'numeric',month:'short'}))}).join(''):'<div class="sub">No earthquakes recorded nearby in this period.</div>'));
+  }catch{cardH('quake','🌍 Nearby earthquakes','<div class="sub">Not available right now.</div>')}
+}
+async function past(){
+  const key=loc.lat+','+loc.lon,fd=x=>x.toISOString().slice(0,10);
+  try{
+    const j=await fetch(`https://archive-api.open-meteo.com/v1/archive?latitude=${loc.lat}&longitude=${loc.lon}&start_date=${fd(new Date(Date.now()-37*864e5))}&end_date=${fd(new Date(Date.now()-7*864e5))}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`).then(r=>r.json());
+    if(!same(key))return;
+    const d=j.daily,n=d.time.length,W=960,H=180,sx=W/n,all=[...d.temperature_2m_max,...d.temperature_2m_min].filter(x=>x!=null),mx=Math.max(...all),mn=Math.min(...all),pm=Math.max(...d.precipitation_sum.filter(x=>x!=null),1);
+    const y=v=>16+(1-((v??mn)-mn)/((mx-mn)||1))*(H-96),ln=a=>a.map((v,k)=>`${k*sx+sx/2},${y(v)}`).join(' ');
+    const bars=d.precipitation_sum.map((v,k)=>`<rect x="${k*sx+3}" y="${H-26-((v||0)/pm)*34}" width="${sx-6}" height="${((v||0)/pm)*34}" rx="3" fill="#7fd6ff" opacity=".85"/>`).join('');
+    const dt=x=>new Date(x+'T00:00').toLocaleDateString([], {day:'numeric',month:'short'}),tot=d.precipitation_sum.reduce((a,b)=>a+(b||0),0);
+    cardH('past','📈 Past 30 days',`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Past 30 days"><polyline points="${ln(d.temperature_2m_max)}" fill="none" stroke="#ffb36b" stroke-width="3" stroke-linejoin="round"/><polyline points="${ln(d.temperature_2m_min)}" fill="none" stroke="#9fe0ff" stroke-width="3" stroke-linejoin="round"/>${bars}<text x="4" y="12" fill="#fff" font-size="13" opacity=".85">${T(mx)}</text><text x="4" y="${H-8}" fill="#fff" font-size="13" opacity=".85">${dt(d.time[0])}</text><text x="${W-4}" y="${H-8}" text-anchor="end" fill="#fff" font-size="13" opacity=".85">${dt(d.time[n-1])}</text></svg><div class="sub">🟠 high · 🔵 low · bars: rain · total ${MM(tot)}</div>`);
+  }catch{cardH('past','📈 Past 30 days','<div class="sub">Not available right now.</div>')}
 }
 
 // share + speak + refresh
