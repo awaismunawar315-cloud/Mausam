@@ -8,33 +8,52 @@
 <style>
 @property --a{syntax:'<color>';inherits:true;initial-value:#2b7fd8}
 @property --b{syntax:'<color>';inherits:true;initial-value:#7ec4ff}
-:root{--glass:rgba(255,255,255,.14);--bd:rgba(255,255,255,.22);color-scheme:dark}
+:root{--glass:rgba(255,255,255,.12);--bd:rgba(255,255,255,.18);color-scheme:dark}
 *{box-sizing:border-box;margin:0}
-body{font-family:Outfit,system-ui,sans-serif;color:#fff;min-height:100vh;background:linear-gradient(160deg,var(--a),var(--b)) fixed;transition:--a 1.4s,--b 1.4s}
+body{font-family:Outfit,system-ui,sans-serif;color:#fff;min-height:100vh;background:linear-gradient(160deg,var(--a),var(--b)) fixed;transition:--a 1.4s,--b 1.4s;overflow-x:hidden}
 #fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+/* Codex-style soft blurred orbs in the middle / background */
+.orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.55;will-change:transform,opacity;animation:orbFloat 18s ease-in-out infinite}
+.orb1{width:min(70vw,520px);height:min(70vw,520px);background:radial-gradient(circle,rgba(126,196,255,.7) 0%,rgba(43,127,216,.15) 60%,transparent 75%);top:-8%;left:50%;transform:translateX(-50%);animation-duration:22s}
+.orb2{width:min(55vw,380px);height:min(55vw,380px);background:radial-gradient(circle,rgba(255,211,107,.45) 0%,rgba(255,138,92,.12) 55%,transparent 70%);top:28%;right:-8%;animation-duration:26s;animation-delay:-6s}
+.orb3{width:min(48vw,320px);height:min(48vw,320px);background:radial-gradient(circle,rgba(155,93,229,.4) 0%,rgba(43,127,216,.1) 55%,transparent 70%);bottom:8%;left:-6%;animation-duration:20s;animation-delay:-12s}
+.orb4{width:min(40vw,260px);height:min(40vw,260px);background:radial-gradient(circle,rgba(127,214,255,.5) 0%,transparent 70%);top:55%;left:40%;animation-duration:24s;animation-delay:-3s;opacity:.35}
+@keyframes orbFloat{
+  0%,100%{transform:translate(0,0) scale(1);opacity:.5}
+  25%{transform:translate(4%,-6%) scale(1.08);opacity:.65}
+  50%{transform:translate(-3%,4%) scale(.95);opacity:.45}
+  75%{transform:translate(5%,3%) scale(1.05);opacity:.6}
+}
 .wrap{position:relative;z-index:1;max-width:1100px;margin:auto;padding:16px 16px 48px}
 .bar{display:flex;gap:8px}
 .search{flex:1;position:relative}
-input{width:100%;padding:14px 20px;border-radius:999px;border:1px solid var(--bd);background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);color:#fff;font:inherit;font-size:1rem;outline:0}
+input{width:100%;padding:14px 20px;border-radius:999px;border:1px solid var(--bd);background:var(--glass);backdrop-filter:blur(24px) saturate(1.3);-webkit-backdrop-filter:blur(24px) saturate(1.3);color:#fff;font:inherit;font-size:1rem;outline:0;transition:background .25s,box-shadow .25s,border-color .25s}
+input:focus{background:rgba(255,255,255,.18);box-shadow:0 0 0 3px rgba(255,255,255,.12),0 8px 32px rgba(0,0,0,.15)}
 input::placeholder{color:rgba(255,255,255,.7)}
 :focus-visible{outline:2px solid #fff;outline-offset:2px}
-.ic{width:48px;height:48px;flex:none;border-radius:50%;border:1px solid var(--bd);background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);color:#fff;font:600 .95rem Outfit,sans-serif;cursor:pointer;transition:transform .15s,background .2s}
-.ic:hover{background:rgba(255,255,255,.26)}.ic:active{transform:scale(.92)}
-#sug{position:absolute;top:56px;left:0;right:0;background:rgba(18,26,44,.94);backdrop-filter:blur(22px);border-radius:20px;overflow:hidden;z-index:5;display:none;box-shadow:0 16px 40px rgba(0,0,0,.35)}
-#sug button{display:block;width:100%;text-align:left;padding:12px 20px;background:none;border:0;color:#fff;font:inherit;cursor:pointer}
+.ic{width:48px;height:48px;flex:none;border-radius:50%;border:1px solid var(--bd);background:var(--glass);backdrop-filter:blur(24px) saturate(1.3);-webkit-backdrop-filter:blur(24px) saturate(1.3);color:#fff;font:600 .95rem Outfit,sans-serif;cursor:pointer;transition:transform .2s cubic-bezier(.34,1.56,.64,1),background .25s,box-shadow .25s}
+.ic:hover{background:rgba(255,255,255,.26);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.18)}.ic:active{transform:scale(.92)}
+#sug{position:absolute;top:56px;left:0;right:0;background:rgba(18,26,44,.88);backdrop-filter:blur(28px) saturate(1.4);-webkit-backdrop-filter:blur(28px) saturate(1.4);border-radius:20px;overflow:hidden;z-index:5;display:none;box-shadow:0 16px 48px rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.12);animation:fadeSlide .28s ease}
+#sug button{display:block;width:100%;text-align:left;padding:12px 20px;background:none;border:0;color:#fff;font:inherit;cursor:pointer;transition:background .15s}
 #sug button:hover,#sug button:focus-visible{background:rgba(255,255,255,.12)}
 #sug small{opacity:.65}
 .chips{display:flex;gap:8px;overflow-x:auto;padding:12px 0;scrollbar-width:none}
-.chip{flex:none;padding:7px 14px;border-radius:999px;border:1px solid var(--bd);background:var(--glass);color:#fff;font:inherit;font-size:.9rem;cursor:pointer;backdrop-filter:blur(12px)}
-.chip:hover{background:rgba(255,255,255,.26)}
-.hero{text-align:center;padding:24px 0 20px}
+.chip{flex:none;padding:7px 14px;border-radius:999px;border:1px solid var(--bd);background:var(--glass);color:#fff;font:inherit;font-size:.9rem;cursor:pointer;backdrop-filter:blur(16px);transition:transform .2s,background .2s}
+.chip:hover{background:rgba(255,255,255,.26);transform:translateY(-1px)}
+.hero{text-align:center;padding:24px 0 20px;animation:heroIn .7s cubic-bezier(.22,1,.36,1) both}
 .city{font-size:1.7rem;font-weight:400}
 .country{opacity:.75;font-size:.95rem}
-.temp{font-size:min(32vw,9.5rem);font-weight:200;line-height:1;letter-spacing:-.05em;margin:6px 0 0 .3em;text-shadow:0 6px 40px rgba(0,0,0,.18)}
+.temp{font-size:min(32vw,9.5rem);font-weight:200;line-height:1;letter-spacing:-.05em;margin:6px 0 0 .3em;text-shadow:0 6px 40px rgba(0,0,0,.18);animation:tempPulse 4s ease-in-out infinite}
 .cond{font-size:1.35rem;font-weight:300}
 .hl{opacity:.85;margin-top:4px}
-.card{background:var(--glass);border:1px solid var(--bd);border-radius:26px;padding:16px 18px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 8px 32px rgba(0,0,0,.12)}
+.card{background:var(--glass);border:1px solid var(--bd);border-radius:26px;padding:16px 18px;backdrop-filter:blur(28px) saturate(1.35);-webkit-backdrop-filter:blur(28px) saturate(1.35);box-shadow:0 8px 32px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.12);transition:transform .35s cubic-bezier(.22,1,.36,1),box-shadow .35s,background .3s;animation:cardIn .6s cubic-bezier(.22,1,.36,1) both}
+.card:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.18);background:rgba(255,255,255,.16)}
 .card h3{font-size:.85rem;font-weight:400;opacity:.78;margin-bottom:10px}
+@keyframes heroIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes cardIn{from{opacity:0;transform:translateY(22px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes tempPulse{0%,100%{text-shadow:0 6px 40px rgba(0,0,0,.18)}50%{text-shadow:0 8px 50px rgba(255,255,255,.15),0 6px 40px rgba(0,0,0,.18)}}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
 .scroll{overflow-x:auto;scrollbar-width:thin}
 .hr{display:flex;width:1536px}
 .hr div{width:64px;flex:none;text-align:center;font-size:.9rem}
@@ -79,10 +98,26 @@ body.ur{font-family:'Noto Naskh Arabic',Outfit,serif;line-height:1.7}
 .act i{display:block;height:6px;border-radius:9px;background:rgba(255,255,255,.2);position:relative;overflow:hidden;margin-top:4px}
 .act i b{position:absolute;inset:0 auto 0 0;border-radius:9px}
 .acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));column-gap:22px}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.orb{display:none}}
+.grid .card:nth-child(1){animation-delay:.05s}.grid .card:nth-child(2){animation-delay:.1s}.grid .card:nth-child(3){animation-delay:.15s}.grid .card:nth-child(4){animation-delay:.2s}.grid .card:nth-child(5){animation-delay:.25s}.grid .card:nth-child(6){animation-delay:.3s}.grid .card:nth-child(7){animation-delay:.35s}.grid .card:nth-child(8){animation-delay:.4s}.grid .card:nth-child(n+9){animation-delay:.45s}
+.alert{animation:cardIn .5s cubic-bezier(.22,1,.36,1) both}
+
+.dashnav{display:flex;gap:7px;overflow:auto;margin-bottom:12px;scrollbar-width:none}.dashnav button{flex:none;padding:8px 13px;border-radius:999px;border:1px solid var(--bd);background:none;color:#fff;font:inherit;cursor:pointer}.dashnav button.on{background:rgba(255,255,255,.28)}
+.dashgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}.mini{padding:13px;border-radius:18px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13)}.mini b{display:block;font-size:1.25rem;font-weight:400;margin-top:4px}.mini small{opacity:.7}
+.dateScroller{display:flex;gap:8px;overflow:auto;padding-bottom:8px}.dateBtn{min-width:88px;padding:10px 8px;border-radius:18px;border:1px solid var(--bd);background:var(--glass);color:#fff;cursor:pointer;text-align:center;font:inherit}.dateBtn.on{background:rgba(255,255,255,.3)}.dateBtn b{display:block;font-size:1.2rem;font-weight:400}.dateBtn small{display:block;opacity:.75}
+.daydetail{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:10px}.daydetail .mini{min-height:90px}
+.maptools{display:flex;gap:8px;overflow:auto;padding:4px 0 10px}.toolgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px}.tool{padding:13px;border-radius:18px;border:1px solid var(--bd);background:var(--glass);color:#fff;font:inherit;cursor:pointer;text-align:left}.tool:hover,.dateBtn:hover{background:rgba(255,255,255,.2)}
+.setting{display:flex;justify-content:space-between;gap:20px;padding:14px 0;border-top:1px solid rgba(255,255,255,.12)}.setting input{width:auto;accent-color:#fff}.closeDlg{float:right;width:38px;height:38px}.tech{font-family:ui-monospace,SFMono-Regular,monospace;font-size:.78rem;white-space:pre-wrap;opacity:.75}
+@media print{body{background:#fff!important;color:#111!important}#fx,.bar,.chips,.meta,.dashnav,.maptools,.toolgrid,#map,.rctl{display:none!important}.card{box-shadow:none;border:1px solid #bbb;background:#fff;color:#111}.sub,.country,.hl{color:#333!important}}
 </style></head>
 <body>
 <canvas id="fx"></canvas>
+<div class="orbs" aria-hidden="true">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+  <div class="orb orb4"></div>
+</div>
 <div class="wrap">
   <div class="bar">
     <div class="search">
@@ -108,7 +143,7 @@ body.ur{font-family:'Noto Naskh Arabic',Outfit,serif;line-height:1.7}
     <div id="alerts"></div>
     <section class="card"><h3>Hourly forecast · next 24 hours</h3>
       <div class="scroll"><div class="hr" id="hr"></div><div id="chart"></div></div></section>
-    <section class="card" style="margin-top:12px"><h3>10-day forecast</h3><div id="days"></div></section>
+    <section class="card" style="margin-top:12px"><h3>16-day forecast</h3><div id="days"></div></section>
     <div class="grid" id="tiles"></div>
     <section class="card" style="margin-top:12px"><h3>Hourly graph · next 48 hours</h3><div class="tabs" id="gtabs"><button data-m="temp">🌡️ Temperature</button><button data-m="rain">🌧️ Rain chance</button><button data-m="wind">💨 Wind</button><button data-m="hum">💧 Humidity</button><button data-m="uv">☀️ UV</button><button data-m="cloud">☁️ Clouds</button></div><div id="gsvg"></div></section>
     <div class="grid" id="tiles2"></div>
@@ -136,9 +171,9 @@ const compass=d=>['N','NE','E','SE','S','SW','W','NW'][Math.round(d/45)%8];
 
 async function load(l){
   loc=l;st.set('loc',l);$('#msg').hidden=false;$('#msg').textContent='Loading weather…';
-  const f=`https://api.open-meteo.com/v1/forecast?latitude=${l.lat}&longitude=${l.lon}&timezone=auto&forecast_days=10`+
-   `&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m,dew_point_2m`+
-   `&hourly=temperature_2m,precipitation_probability,weather_code,visibility,is_day,apparent_temperature,relative_humidity_2m,wind_speed_10m,uv_index,precipitation,cloud_cover,soil_temperature_6cm,soil_moisture_3_to_9cm`+
+  const f=`https://api.open-meteo.com/v1/forecast?latitude=${l.lat}&longitude=${l.lon}&timezone=auto&forecast_days=16`+
+   `&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,snow_depth,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m,dew_point_2m,vapour_pressure_deficit,wet_bulb_temperature_2m`+
+   `&hourly=temperature_2m,precipitation_probability,weather_code,visibility,is_day,apparent_temperature,relative_humidity_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index,precipitation,rain,showers,snowfall,snow_depth,cloud_cover,pressure_msl,dew_point_2m,vapour_pressure_deficit,wet_bulb_temperature_2m,soil_temperature_6cm,soil_moisture_3_to_9cm`+
    `&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,daylight_duration,et0_fao_evapotranspiration`;
   const a=`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${l.lat}&longitude=${l.lon}&current=us_aqi,pm2_5,pm10,ozone,nitrogen_dioxide,sulphur_dioxide,carbon_monoxide,dust`;
   try{
@@ -314,7 +349,7 @@ Moon=چاند
 Max wind today=آج کی تیز ترین ہوا
 What to wear=کیا پہنیں
 Hourly forecast · next 24 hours=گھنٹہ وار پیشگوئی · اگلے 24 گھنٹے
-10-day forecast=10 دن کی پیشگوئی
+16-day forecast=10 دن کی پیشگوئی
 Rain map=بارش کا نقشہ
 Compare locations=مقامات کا موازنہ
 Today=آج
@@ -615,7 +650,107 @@ $('#rf').onclick=()=>load(loc);
 $('#sh').onclick=async()=>{const t=sumTxt()+' (Mausam weather app)';try{if(navigator.share)await navigator.share({text:t});else{await navigator.clipboard.writeText(t);$('#sh').textContent='✓ Copied';setTimeout(()=>{$('#sh').textContent='📤 Share';tru($('#sh'))},1500)}}catch{}};
 $('#sp').onclick=()=>{if(!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(sumTxt());u.lang='en-US';speechSynthesis.speak(u)};
 
+
+// ---------- Extended dashboard ----------
+const SETTINGS=st.get('settings',{clock24:false,lessMotion:false,autoRefresh:true,techMode:false});
+const fmtTime=(date,tz=D&&D.timezone)=>date.toLocaleTimeString([], {hour:SETTINGS.clock24?'2-digit':'numeric',minute:'2-digit',hour12:!SETTINGS.clock24,timeZone:tz});
+function mini(title,value,sub=''){return `<div class="mini"><small>${title}</small><b>${value}</b><small>${sub}</small></div>`}
+function dash(){
+  const c=D.current,h=D.hourly,d=D.daily,i=HI||0;
+  const p24=Math.max(...h.precipitation_probability.slice(i,i+24));
+  const rain24=h.precipitation.slice(i,i+24).reduce((a,b)=>a+(b||0),0);
+  const windMax=Math.max(...h.wind_speed_10m.slice(i,i+24).filter(x=>x!=null));
+  const dew=c.dew_point_2m,wet=c.wet_bulb_temperature_2m,vpd=c.vapour_pressure_deficit;
+  const panels={
+    overview:[['🌡️ Feels like',T(c.apparent_temperature),c.apparent_temperature>c.temperature_2m?'warmer':'cooler'],['🌧️ Next 24h rain',MM(rain24),p24+'% max chance'],['💨 Max wind',SP(windMax),'next 24 hours'],['💧 Dew point',T(dew),'comfort indicator'],['🌡️ Wet-bulb',T(wet),'heat/humidity indicator'],['☁️ Clouds',c.cloud_cover+'%','current cover']],
+    wind:[['💨 Wind',SP(c.wind_speed_10m),compass(c.wind_direction_10m)],['🌀 Gusts',SP(c.wind_gusts_10m),'peak/current area'],['🧭 Direction',compass(c.wind_direction_10m),c.wind_direction_10m+'°'],['💨 24h peak',SP(windMax),'forecast'],['🌬️ VPD',vpd==null?'—':vpd.toFixed(2)+' kPa','dryness of air'],['📏 Pressure',PR(c.pressure_msl),'sea level']],
+    rain:[['🌧️ Rain now',MM(c.precipitation),'current precipitation'],['🌧️ 24h total',MM(rain24),p24+'% chance'],['❄️ Snow now',c.snowfall==null?'—':MM(c.snowfall),'current'],['🌨️ Snow depth',c.snow_depth==null?'—':c.snow_depth.toFixed(0)+' cm','ground'],['☔ Rain outlook',OUT,'next event'],['☁️ Cloud cover',c.cloud_cover+'%','current']],
+    sun:[['🌅 Sunrise',hm(d.sunrise[0]),'local'],['🌇 Sunset',hm(d.sunset[0]),'local'],['☀️ Daylight',Math.floor(d.daylight_duration[0]/3600)+'h '+Math.floor(d.daylight_duration[0]%3600/60)+'m','today'],['☀️ UV peak',Math.round(d.uv_index_max[0]),'today'],['🌙 Moon',(['New moon','Waxing crescent','First quarter','Waxing gibbous','Full moon','Waning gibbous','Last quarter','Waning crescent'][Math.round(ph*8)%8]),'phase'],['✨ Illumination',Math.round((1-Math.cos(ph*2*Math.PI))/2*100)+'%','moon']],
+    health:[['🍃 AQI',AQ?.us_aqi??'—',AQ?.us_aqi<=50?'Good':'Check air quality'],['💧 Humidity',c.relative_humidity_2m+'%','current'],['🌡️ Wet-bulb',T(wet),'heat stress indicator'],['☀️ UV',Math.round(d.uv_index_max[0]),uvL],['👁️ Visibility',VI(h.visibility[i]||0),'current'],['😌 Comfort',c.apparent_temperature>=41?'Dangerous heat':c.apparent_temperature>=35?'Very hot':c.apparent_temperature>=29?'Hot':c.apparent_temperature>=24?'Warm':c.apparent_temperature>=17?'Pleasant':c.apparent_temperature>=10?'Cool':c.apparent_temperature>=0?'Cold':'Freezing','based on weather']],
+    travel:[['🚗 Driving',h.visibility[i]<3000?'Use caution':'Generally good',VI(h.visibility[i]||0)+' visibility'],['🛣️ Rain risk',p24+'%', 'next 24h'],['💨 Wind risk',SP(windMax),'peak'],['🧳 Packing',wear(c,d,h,i,d.uv_index_max[0])[1],'suggestion'],['⏰ Local time',fmtTime(new Date()),D.timezone],['📍 Location',loc.n,loc.c||'']]
+  };
+  const key=document.querySelector('#dashnav .on')?.dataset.panel||'overview';
+  $('#dashbody').innerHTML=`<div class="dashgrid">${panels[key].map(x=>mini(...x)).join('')}</div>`;
+}
+$('#dashnav').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#dashnav button').forEach(x=>x.classList.remove('on'));b.classList.add('on');dash()});
+
+function advanced(){
+ const c=D.current,h=D.hourly,d=D.daily,i=HI||0;
+ const dew=c.dew_point_2m,sp=c.surface_pressure,wet=c.wet_bulb_temperature_2m;
+ const tiles=[
+  ['🌡️ Wet-bulb temperature',wet==null?'—':T(wet),'Heat + humidity'],
+  ['💧 Dew point',T(dew),'Moisture in air'],
+  ['📉 Surface pressure',PR(sp),'Local pressure'],
+  ['🌧️ Rain',MM(c.rain||0),'current rain rate'],
+  ['🌦️ Showers',MM(c.showers||0),'current showers'],
+  ['❄️ Snowfall',c.snowfall==null?'—':MM(c.snowfall),'current snowfall'],
+  ['❄️ Snow depth',c.snow_depth==null?'—':c.snow_depth.toFixed(0)+' cm','ground snow'],
+  ['🧪 Vapour pressure deficit',c.vapour_pressure_deficit==null?'—':c.vapour_pressure_deficit.toFixed(2)+' kPa','atmospheric dryness'],
+  ['💨 Wind direction',compass(c.wind_direction_10m),c.wind_direction_10m+'°'],
+  ['🌧️ Rain probability',d.precipitation_probability_max[0]+'%','today'],
+  ['🌧️ Total precipitation',MM(d.precipitation_sum[0]),'today'],
+  ['💦 Evapotranspiration',MM(d.et0_fao_evapotranspiration[0]),'estimated water loss']
+ ];
+ $('#advancedTiles').innerHTML=tiles.map(x=>`<div class="card"><h3>${x[0]}</h3><div class="big">${x[1]}</div><div class="sub">${x[2]}</div></div>`).join('');
+}
+
+function explorer(){
+ const d=D.daily;
+ $('#dateScroller').innerHTML=d.time.map((t,j)=>`<button class="dateBtn ${j===0?'on':''}" data-day="${j}"><small>${j===0?'Today':j===1?'Tomorrow':new Date(t+'T00:00').toLocaleDateString([], {weekday:'short'})}</small><b>${icon(d.weather_code[j])}</b><span>${T(d.temperature_2m_max[j])}</span></button>`).join('');
+ document.querySelectorAll('.dateBtn').forEach(b=>b.onclick=()=>selectDay(+b.dataset.day));
+ selectDay(0);
+}
+function selectDay(j){
+ const d=D.daily,t=d.time[j],r=d.precipitation_probability_max[j],w=d.wind_speed_10m_max[j];
+ document.querySelectorAll('.dateBtn').forEach(x=>x.classList.toggle('on',+x.dataset.day===j));
+ $('#selectedDay').innerHTML=`<div class="daydetail">
+ ${mini('📅 Date',j===0?'Today':new Date(t+'T00:00').toLocaleDateString([], {weekday:'long',day:'numeric',month:'long'}),'')}
+ ${mini('🌡️ Temperature',T(d.temperature_2m_min[j])+' — '+T(d.temperature_2m_max[j]),'low — high')}
+ ${mini('🌧️ Rain',r+'%',MM(d.precipitation_sum[j]||0))}
+ ${mini('💨 Wind',SP(w),'maximum')}
+ ${mini('☀️ UV',Math.round(d.uv_index_max[j]),'maximum')}
+ ${mini('🌅 Sun',hm(d.sunrise[j])+' / '+hm(d.sunset[j]),'sunrise / sunset')}
+ ${mini('☀️ Daylight',Math.floor(d.daylight_duration[j]/3600)+'h '+Math.floor(d.daylight_duration[j]%3600/60)+'m','duration')}
+ ${mini('🌱 ET₀',MM(d.et0_fao_evapotranspiration[j]||0),'estimated water loss')}
+ </div>`;
+}
+
+function places(){
+ $('#placesList').innerHTML=saved.length?saved.map((x,i)=>`<div class="kv"><span>⭐ ${esc(x.n)}<small style="display:block;opacity:.6">${esc(x.c||'')}</small></span><span><button class="chip usePlace" data-i="${i}">Open</button><button class="chip delPlace" data-i="${i}">Delete</button></span></div>`).join(''):'<div class="sub">No saved places yet.</div>';
+ document.querySelectorAll('.usePlace').forEach(b=>b.onclick=()=>{$('#placesDlg').close();load(saved[+b.dataset.i])});
+ document.querySelectorAll('.delPlace').forEach(b=>{b.onclick=()=>{saved.splice(+b.dataset.i,1);st.set('saved',saved);places();chips();if(D)render()}});
+}
+$('#favManage').onclick=()=>{$('#placesDlg').showModal();places()};
+$('#openSettings').onclick=()=>{$('#clock24').checked=SETTINGS.clock24;$('#lessMotion').checked=SETTINGS.lessMotion;$('#autoRefresh').checked=SETTINGS.autoRefresh;$('#techMode').checked=SETTINGS.techMode;$('#settingsDlg').showModal()};
+document.querySelectorAll('.closeDlg').forEach(b=>b.onclick=()=>b.closest('dialog').close());
+['clock24','lessMotion','autoRefresh','techMode'].forEach(id=>document.getElementById(id).onchange=e=>{SETTINGS[id]=e.target.checked;st.set('settings',SETTINGS);if(id==='lessMotion')document.body.classList.toggle('lessmotion',SETTINGS.lessMotion);if(D)render()});
+$('#copyForecast').onclick=async()=>{try{await navigator.clipboard.writeText(sumTxt()+'\n'+D.daily.time.map((x,j)=>`${x}: ${T(D.daily.temperature_2m_min[j])}–${T(D.daily.temperature_2m_max[j])}, rain ${D.daily.precipitation_probability_max[j]}%`).join('\n'));$('#copyForecast').textContent='✓ Copied';setTimeout(()=>$('#copyForecast').textContent='📋 Copy forecast',1400)}catch{}};
+$('#printForecast').onclick=()=>window.print();
+$('#exportData').onclick=()=>{if(!D)return;const blob=new Blob([JSON.stringify({location:loc,forecast:D,airQuality:AQ},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`mausam-${loc.n.replace(/\s+/g,'-')}.json`;a.click();URL.revokeObjectURL(a.href)};
+$('#installTip').onclick=()=>dlg('<h3>📱 Use Mausam like an app</h3><div class="sub">On supported browsers, open the browser menu and choose “Install app” or “Add to Home screen”. This version can also keep the latest successful forecast cached for offline viewing.</div>');
+$('#mapLocate').onclick=()=>{if(map){map.setView([loc.lat,loc.lon],8);mk?.setLatLng([loc.lat,loc.lon])}};
+document.querySelectorAll('[data-layer]').forEach(b=>b.onclick=()=>switchMapLayer(b.dataset.layer));
+
+let mapLayers={};
+function switchMapLayer(layer){
+ if(typeof L==='undefined'||!map)return;
+ Object.values(mapLayers).forEach(x=>map.removeLayer(x));
+ const urls={
+  rain:'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/IMERG_Precipitation_Rate/default/GoogleMapsCompatible_Level6/{z}/{y}/{x}.png',
+  cloud:'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/GOES-East_ABI_Geocolor/default/GoogleMapsCompatible_Level5/{z}/{y}/{x}.jpg',
+  sat:'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_SNPP_CorrectedReflectance_TrueColor/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpg',
+  terrain:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'
+ };
+ if(urls[layer]){mapLayers[layer]=L.tileLayer(urls[layer],{opacity:.72,maxNativeZoom:layer==='terrain'?17:8,attribution:layer==='terrain'?'© OpenTopoMap':'NASA GIBS'}).addTo(map)}
+}
+
+function extraRender(){
+ if(!D)return;dash();advanced();explorer();
+}
+const _render=render;
+render=function(){_render();setTimeout(extraRender,20)};
+
 chips();load(loc);
-setInterval(()=>load(loc),10*60*1000);
+setInterval(()=>{if(SETTINGS.autoRefresh)load(loc)},10*60*1000);
 </script>
 </body></html>
